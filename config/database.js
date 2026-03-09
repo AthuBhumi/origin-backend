@@ -28,6 +28,7 @@ const initDatabase = () => {
         price REAL NOT NULL,
         category TEXT,
         features TEXT,
+        image TEXT,
         status TEXT DEFAULT 'active',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -62,30 +63,54 @@ const initDatabase = () => {
       )
     `);
 
-    // Create default admin user
-    const defaultAdminEmail = process.env.ADMIN_EMAIL || 'admin@itcompany.com';
-    const defaultAdminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
-    
-    db.get('SELECT * FROM admins WHERE email = ?', [defaultAdminEmail], (err, row) => {
+    // Blogs table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS blogs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        slug TEXT UNIQUE NOT NULL,
+        content TEXT NOT NULL,
+        excerpt TEXT,
+        cover_image TEXT,
+        category TEXT,
+        tags TEXT,
+        author TEXT DEFAULT 'Admin',
+        status TEXT DEFAULT 'draft',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Case Studies table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS case_studies (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        slug TEXT UNIQUE NOT NULL,
+        client_name TEXT,
+        industry TEXT,
+        challenge TEXT,
+        solution TEXT,
+        results TEXT,
+        cover_image TEXT,
+        technologies TEXT,
+        testimonial TEXT,
+        status TEXT DEFAULT 'draft',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create default admin
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@originplatforms.co';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
+
+    db.get('SELECT * FROM admins WHERE email = ?', [adminEmail], (err, row) => {
       if (!row) {
-        bcrypt.hash(defaultAdminPassword, 10, (err, hash) => {
-          if (err) {
-            console.error('Error hashing password:', err);
-            return;
-          }
-          db.run(
-            'INSERT INTO admins (email, password, name) VALUES (?, ?, ?)',
-            [defaultAdminEmail, hash, 'Admin'],
-            (err) => {
-              if (err) {
-                console.error('Error creating default admin:', err);
-              } else {
-                console.log('✅ Default admin created successfully');
-                console.log('📧 Email:', defaultAdminEmail);
-                console.log('🔑 Password:', defaultAdminPassword);
-              }
-            }
-          );
+        bcrypt.hash(adminPassword, 10, (err, hash) => {
+          if (err) return;
+          db.run('INSERT INTO admins (email, password, name) VALUES (?, ?, ?)',
+            [adminEmail, hash, 'Admin']);
         });
       }
     });

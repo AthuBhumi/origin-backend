@@ -8,29 +8,29 @@ const sqlite3 = require('sqlite3').verbose();
 // Import database configuration (initializes DB)
 require('./config/database');
 
-// Import and initialize admin panel database
-const { initializeAdminDatabase } = require('./config/adminSchema');
-
 // Import public routes
 const productRoutes = require('./routes/products');
 const enquiryRoutes = require('./routes/enquiries');
+const portfolioRoutes = require('./routes/portfolio');
+const blogRoutes = require('./routes/blogs');
+const caseStudyRoutes = require('./routes/caseStudies');
 
-// Import admin panel routes
+// Import admin routes
 const adminAuthRoutes = require('./routes/adminAuth');
-const adminClientsRoutes = require('./routes/adminClients');
-const adminProjectsRoutes = require('./routes/adminProjects');
-const adminMilestonesTasksRoutes = require('./routes/adminMilestonesTasks');
-const adminDeliverablesRoutes = require('./routes/adminDeliverables');
-const adminTeamRoutes = require('./routes/adminTeam');
-const adminMessagesRoutes = require('./routes/adminMessages');
-const adminReportsRoutes = require('./routes/adminReports');
-const adminDashboardRoutes = require('./routes/adminDashboard');
+const adminProductRoutes = require('./routes/adminProducts');
+const adminEnquiryRoutes = require('./routes/adminEnquiries');
+const adminBlogRoutes = require('./routes/adminBlogs');
+const adminCaseStudyRoutes = require('./routes/adminCaseStudies');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 
-// CORS Configuration for Production
+// CORS Configuration for Production & Development
 const corsOptions = {
   origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5000',
     'https://originplatforms.co',
     'http://originplatforms.co',
     'https://www.originplatforms.co',
@@ -58,65 +58,20 @@ const limiter = rateLimit({
 // Apply rate limiting to all routes
 app.use('/api/', limiter);
 
-// Initialize admin panel database
-const ADMIN_DB_PATH = path.join(__dirname, 'adminpanel.db');
-let adminDb = new sqlite3.Database(ADMIN_DB_PATH, (err) => {
-  if (err) {
-    console.error('❌ Error connecting to admin database:', err);
-  } else {
-    console.log('✅ Connected to admin database');
-    initializeAdminDatabase(adminDb)
-      .then(() => {
-        console.log('✅ Admin Panel database initialized successfully');
-        // Store admin db in app locals for access in routes
-        app.locals.adminDb = adminDb;
-      })
-      .catch(err => {
-        console.error('❌ Error initializing admin panel database:', err);
-      });
-  }
-});
-
 // Public routes
 app.use('/api/products', productRoutes);
 app.use('/api/enquiries', enquiryRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/case-studies', caseStudyRoutes);
 
-// Admin panel routes
-app.use('/api/admin/auth', (req, res, next) => {
-  adminAuthRoutes(adminDb)(req, res, next);
-});
-
-app.use('/api/admin/clients', (req, res, next) => {
-  adminClientsRoutes(adminDb)(req, res, next);
-});
-
-app.use('/api/admin/projects', (req, res, next) => {
-  adminProjectsRoutes(adminDb)(req, res, next);
-});
-
-app.use('/api/admin/milestones-tasks', (req, res, next) => {
-  adminMilestonesTasksRoutes(adminDb)(req, res, next);
-});
-
-app.use('/api/admin/deliverables', (req, res, next) => {
-  adminDeliverablesRoutes(adminDb)(req, res, next);
-});
-
-app.use('/api/admin/team', (req, res, next) => {
-  adminTeamRoutes(adminDb)(req, res, next);
-});
-
-app.use('/api/admin/messages', (req, res, next) => {
-  adminMessagesRoutes(adminDb)(req, res, next);
-});
-
-app.use('/api/admin/reports', (req, res, next) => {
-  adminReportsRoutes(adminDb)(req, res, next);
-});
-
-app.use('/api/admin/dashboard', (req, res, next) => {
-  adminDashboardRoutes(adminDb)(req, res, next);
-});
+// Admin routes
+app.use('/api/admin/auth', adminAuthRoutes);
+app.use('/api/admin/products', adminProductRoutes);
+app.use('/api/admin/enquiries', adminEnquiryRoutes);
+app.use('/api/admin/blogs', adminBlogRoutes);
+app.use('/api/admin/case-studies', adminCaseStudyRoutes);
+app.use('/api/admin/upload', uploadRoutes());
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

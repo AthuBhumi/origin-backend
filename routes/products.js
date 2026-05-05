@@ -98,13 +98,27 @@ router.get('/:id', (req, res) => {
             });
           }
 
-          res.json({
-            success: true,
-            product: {
-              ...product,
-              images: images.map(img => img.image_url)
+          // Get product plans
+          db.all(
+            'SELECT * FROM product_plans WHERE product_id = ? AND status = ? ORDER BY sort_order ASC, price ASC',
+            [productId, 'active'],
+            (err, plans) => {
+              const parsedPlans = (plans || []).map(p => ({
+                ...p,
+                features: p.features ? JSON.parse(p.features) : [],
+                limits: p.limits ? JSON.parse(p.limits) : {}
+              }));
+
+              res.json({
+                success: true,
+                product: {
+                  ...product,
+                  images: images.map(img => img.image_url),
+                  plans: parsedPlans
+                }
+              });
             }
-          });
+          );
         }
       );
     }

@@ -23,23 +23,43 @@ router.get('/:id', verifyAdmin, (req, res) => {
 });
 
 // Create blog
-router.post('/', verifyAdmin, upload.single('cover_image'), (req, res) => {
+router.post('/', verifyAdmin, (req, res, next) => {
+  upload.single('cover_image')(req, res, (err) => {
+    if (err) {
+      console.error('Upload error:', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+    next();
+  });
+}, (req, res) => {
   const { title, content, excerpt, category, tags, status } = req.body;
   const cover_image = req.file ? `/uploads/${req.file.filename}` : null;
-  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const baseSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const slug = baseSlug + '-' + Date.now();
 
   db.run(
     'INSERT INTO blogs (title, slug, content, excerpt, cover_image, category, tags, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [title, slug, content, excerpt, cover_image, category, tags, status || 'draft'],
+    [title, slug, content, excerpt, cover_image, category || null, tags, status || 'draft'],
     function(err) {
-      if (err) return res.status(500).json({ error: err.message });
+      if (err) {
+        console.error('Blog create error:', err.message);
+        return res.status(500).json({ error: err.message });
+      }
       res.json({ success: true, id: this.lastID, message: 'Blog created' });
     }
   );
 });
 
 // Update blog
-router.put('/:id', verifyAdmin, upload.single('cover_image'), (req, res) => {
+router.put('/:id', verifyAdmin, (req, res, next) => {
+  upload.single('cover_image')(req, res, (err) => {
+    if (err) {
+      console.error('Upload error:', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+    next();
+  });
+}, (req, res) => {
   const { title, content, excerpt, category, tags, status } = req.body;
   const cover_image = req.file ? `/uploads/${req.file.filename}` : null;
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');

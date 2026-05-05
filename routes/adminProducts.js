@@ -29,12 +29,12 @@ router.get('/:id', verifyAdmin, (req, res) => {
 
 // Create product
 router.post('/', verifyAdmin, upload.single('image'), (req, res) => {
-  const { name, description, price, category, features, status } = req.body;
+  const { name, description, price, category, features, status, product_type, trial_days, trial_url, demo_url, card_template } = req.body;
   const image = req.file ? `/uploads/${req.file.filename}` : null;
 
   db.run(
-    'INSERT INTO products (name, description, price, category, features, image, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [name, description, price, category, features, image, status || 'active'],
+    'INSERT INTO products (name, description, price, category, features, image, status, product_type, trial_days, trial_url, demo_url, card_template) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [name, description, price, category, features, image, status || 'active', product_type || 'product', trial_days || 0, trial_url || null, demo_url || null, card_template || 'classic'],
     function(err) {
       if (err) return res.status(500).json({ error: 'Database error' });
 
@@ -50,11 +50,11 @@ router.post('/', verifyAdmin, upload.single('image'), (req, res) => {
 
 // Update product
 router.put('/:id', verifyAdmin, upload.single('image'), (req, res) => {
-  const { name, description, price, category, features, status } = req.body;
+  const { name, description, price, category, features, status, product_type, trial_days, trial_url, demo_url, card_template } = req.body;
   const image = req.file ? `/uploads/${req.file.filename}` : null;
 
-  let query = 'UPDATE products SET name=?, description=?, price=?, category=?, features=?, status=?, updated_at=CURRENT_TIMESTAMP';
-  let params = [name, description, price, category, features, status || 'active'];
+  let query = 'UPDATE products SET name=?, description=?, price=?, category=?, features=?, status=?, product_type=?, trial_days=?, trial_url=?, demo_url=?, card_template=?, updated_at=CURRENT_TIMESTAMP';
+  let params = [name, description, price, category, features, status || 'active', product_type || 'product', trial_days || 0, trial_url || null, demo_url || null, card_template || 'classic'];
 
   if (image) {
     query += ', image=?';

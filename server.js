@@ -22,6 +22,8 @@ const adminEnquiryRoutes = require('./routes/adminEnquiries');
 const adminBlogRoutes = require('./routes/adminBlogs');
 const adminCaseStudyRoutes = require('./routes/adminCaseStudies');
 const uploadRoutes = require('./routes/upload');
+const trialSignupRoutes = require('./routes/trialSignups');
+const productPlanRoutes = require('./routes/productPlans');
 
 const app = express();
 
@@ -64,6 +66,8 @@ app.use('/api/enquiries', enquiryRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/case-studies', caseStudyRoutes);
+app.use('/api/trial-signups', trialSignupRoutes);
+app.use('/api/product-plans', productPlanRoutes);
 
 // Admin routes
 app.use('/api/admin/auth', adminAuthRoutes);
@@ -72,6 +76,8 @@ app.use('/api/admin/enquiries', adminEnquiryRoutes);
 app.use('/api/admin/blogs', adminBlogRoutes);
 app.use('/api/admin/case-studies', adminCaseStudyRoutes);
 app.use('/api/admin/upload', uploadRoutes());
+app.use('/api/admin/trial-signups', trialSignupRoutes);
+app.use('/api/admin/product-plans', productPlanRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

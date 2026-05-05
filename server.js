@@ -36,7 +36,9 @@ const corsOptions = {
     'https://originplatforms.co',
     'http://originplatforms.co',
     'https://www.originplatforms.co',
-    'http://www.originplatforms.co'
+    'http://www.originplatforms.co',
+    'https://admin.originplatforms.co',
+    'http://admin.originplatforms.co'
   ],
   credentials: true,
   optionsSuccessStatus: 200
